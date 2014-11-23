@@ -1,4 +1,4 @@
 aco-scs
 =======
 
-ACO implementation for SCS problem.
+ACO implementation for the SCS problem.
