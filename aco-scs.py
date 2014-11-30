@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import pants
+import pantspath
 
 nodes = []
 
@@ -18,24 +18,24 @@ def dist(a, b):
 	for i in range(0, len(b), 1):
 		if (a.endswith(b[0:len(b) - i])):
 			return 100 - (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
-	return 100 # CASO NÃO EXISTA ARESTA DEVERIA RETORNAR 0, PORÉM ESTÁ DANDO UM ERRO, ENTÃO COLOQUEI 1 TEMPORARIAMENTE 
+	return 100 #
 
-world = pants.World(nodes, dist)
-solver = pants.Solver()
+world = pantspath.World(nodes, dist)
+solver = pantspath.Solver()
 solution = solver.solve(world)
 
 print("Nodes: ", nodes)
 print("Nós visitados em ordem: ", solution.tour)
 print("Tamanho da solução: ", solution.distance)
-print("Tamanho da solução: ", -(solution.distance - (100 *5)))
+print("Tamanho da solução: ", -(solution.distance - (100 *4)))
 
 # Construi a SCS
 scs = ""
 for edge in solution.path:
 	# Adiciono o prefixo de cada no do caminho da solução
-	# Não considero o utlimo nó pois ele vai ser o primeiro
 	f = edge.start
-	end = f[len(f) - (100 - edge.length):len(f)]
+	# Não considero o utlimo nó pois ele vai ser o primeiro
+	end = edge.end
 	scs = scs + f[0:len(f) - (100 - edge.length)]
 	#print("Aresta", f[0:len(f) - (100 - edge.length)])
 
