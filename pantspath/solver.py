@@ -104,7 +104,7 @@ class Solver:
         for i in range(self.limit):
             self.reset_colony(colony)
             local_best = self.aco(colony)
-            if global_best is None or local_best < global_best:
+            if global_best is None or local_best > global_best:
                 global_best = copy(local_best)
             self.trace_elite(global_best)
         return global_best
@@ -125,7 +125,7 @@ class Solver:
         for i in range(self.limit):
             self.reset_colony(colony)
             local_best = self.aco(colony)
-            if global_best is None or local_best < global_best:
+            if global_best is None or local_best > global_best:
                 global_best = copy(local_best)
                 yield global_best
             self.trace_elite(global_best)
