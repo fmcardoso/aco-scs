@@ -1,0 +1,177 @@
+#!/usr/bin/python3
+import pants
+import operator
+import copy
+
+class Edge:
+  def __init__(self, source, target, weight):
+    self.source = source
+    self.target = target
+    self.weight = weight
+    self.valid = True
+
+  def __repr__(self):
+    return "{%s, %s, %s, %s}" % (self.source, self.target, self.weight, self.valid)
+
+  def __str__(self):
+    return "{%s, %s, %s, %s}" % (self.source, self.target, self.weight, self.valid)
+
+class Graph:
+  def __init__(self, vertexes):
+    self.edges = []
+    self.vertexes = vertexes
+    
+  def __repr__(self):
+    return "{%s, %s}" % (self.edges, self.vertexes)
+
+class Solution:
+  def __init__(self):
+    self.vertexes = []
+    self.sequence = ''
+   
+  def __repr__(self):
+    return "{%s, %s}" % (self.sequence, self.vertexes)
+ 
+def find_overlap(node1, node2):
+  overlap = 0;
+  for i in range(0, len(node2), 1):
+    if (node1.endswith(node2[0:i+1])):
+      overlap = i+1 # CASO EXISTA ARESTA, RETORNA O TAMANHO
+  return overlap
+
+def build_graph(nodes):
+  graph = Graph(nodes)
+  edges = []
+  for x in range(0, len(nodes)):
+    for y in range(0, len(nodes)):
+      if x!=y:
+        edges.append(Edge(x, y, find_overlap(nodes[x], nodes[y])))
+  graph.edges = sorted(edges, key=lambda edge: edge.weight, reverse=True)
+  return graph
+
+def findParent(parent, i):
+  if (parent[i] == -1):
+    return i
+  return findParent(parent, parent[i])
+
+def union(parent, x, y):
+    xset = findParent(parent, x)
+    yset = findParent(parent, y)
+    parent[xset] = yset
+
+def hasCycle(graph, edge):
+  graph.edges.append(edge)
+  graph.vertexes.append(edge.source)
+  graph.vertexes.append(edge.target)
+    
+  parent = [-1 for i in range(0,len(graph.vertexes))]
+    
+  for edge in graph.edges:
+    x = findParent(parent, graph.vertexes.index(edge.source))
+    y = findParent(parent, graph.vertexes.index(edge.target))
+
+    if x==y:
+      return True
+    union(parent, x, y)
+  return False
+
+def assembyFragment(path):
+  finalSolution = []
+  
+  for edge in path.edges:
+    print(finalSolution)
+
+    has = False
+    hasTwo = False
+    hasTarget = False
+    hasSource = False
+    auxVertex = []
+    auxSequence = ''
+    auxX = 0
+    auxY = 0
+    for x in range(0, len(finalSolution)):
+      if edge.source in finalSolution[x].vertexes:
+        for y in range(0, len(finalSolution)):
+          if edge.target in finalSolution[y].vertexes:
+            for vertex in finalSolution[y].vertexes:
+              auxVertex.append(vertex)
+            finalSolution[x].sequence+=finalSolution[y].sequence[edge.weight:]
+            auxX = x
+            auxY = y
+            hasTwo= True
+            hasSource= False
+            has = True
+        if not hasTwo:
+          auxX = x
+          hasSource = True
+          has = True
+    if not hasTwo:
+      for x in range(0, len(finalSolution)):
+        if edge.target in finalSolution[x].vertexes:
+          for y in range(0, len(finalSolution)):
+            if not edge.source in finalSolution[y].vertexes:
+              for vertex in finalSolution[y].vertexes:
+                auxVertex.append(vertex)
+              finalSolution[x].sequence+=finalSolution[y].sequence[edge.weight:]
+              auxX = x
+              auxY = y
+              hasTwo= False
+              hasSource= False
+              has = True
+              hasTarget = True
+
+    if hasSource:      
+      finalSolution[auxX].vertexes.append(edge.target)
+      finalSolution[auxX].sequence+=nodes[edge.target][edge.weight:]   
+    if hasTarget:      
+      finalSolution[auxY].vertexes.insert(0, edge.source)
+      finalSolution[auxY].sequence =  finalSolution[auxY].sequence.join((nodes[edge.source][:edge.weight], finalSolution[auxY].sequence))    
+    if hasTwo:
+      for vertex in auxVertex:
+        finalSolution[auxX].vertexes.append(vertex)
+      finalSolution.pop(auxY)
+    if has==False:
+      solution = Solution()
+      solution.vertexes.append(edge.source)
+      solution.vertexes.append(edge.target)
+      solution.sequence += nodes[edge.source] + nodes[edge.target][edge.weight:]
+      finalSolution.append(solution)
+  return finalSolution
+
+nodes = []
+nodes.append('ACTACAC')
+nodes.append('CACTCAGGCA')
+nodes.append('GCATTCACTA')
+nodes.append('ACTAGAAATATA')
+nodes.append('TATACCAGC')  
+
+graph = build_graph(nodes)
+print('Graph: ', graph, '\n')
+
+path = Graph([])
+
+### ENCONTRAR CAMINHO HAMILTONIANO
+for edge in graph.edges:
+  for x in path.edges:
+      if edge.source == x.source:
+        edge.valid = False
+      else:
+        if edge.target == x.target:
+          edge.valid = False
+        else:
+          if hasCycle(copy.deepcopy(path), copy.deepcopy(edge)):
+            edge.valid = False
+
+  if (edge.valid):
+    path.edges.append(edge)
+    if edge.source not in path.vertexes:
+      path.vertexes.append(edge.source)
+    if edge.target not in path.vertexes: 
+      path.vertexes.append(edge.target)
+
+print('Path: ', path)
+
+### MONTAR A SEQUENCIA ORIGINIAL
+assembledSequence = assembyFragment(copy.deepcopy(path))
+  
+print(assembledSequence)
