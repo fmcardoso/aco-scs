@@ -3,22 +3,34 @@ import string
 import random
 from random import randint
 
-def generate():
+def generate(fragmentsDir, genomeDir, id):
 	def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 	    return ''.join(random.choice(chars) for _ in range(size))
 
-	file = open("gen/fragments.txt", "w")
-
+	
+	# Gera sequência
 	genome = id_generator(1000, "ACTG")
+	
+	# Escreve sequência
+	file = open(genomeDir + str(id) + ".txt", "w")
+	file.write(genome)
+	file.close()
+
+	file = open(fragmentsDir + str(id) + ".txt", "w")
 	collection = [genome, genome, genome]
 
 	print("Tamanho Sequência Original:", len(genome))
 
+	added = []
+
 	for i in collection:
 	  x = 0
 	  while (x < len(i)):
-	    t = randint(25,50)
+	    t = randint(25,40)
 	    fragment = i[x:x+t]
-	    x = x+t
-	    file.write(fragment + "\n")
+	    x=x+t	
+
+	    if fragment not in added:
+		    file.write(fragment + "\n")
+		    added.append(fragment)
 	file.close()
