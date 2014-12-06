@@ -20,12 +20,11 @@ def solve(fragFileName, outputFile):
 	#nodes.append('TATACCAGC')
 
 	# FUNÇÃO PARA CALCULAR O TAMANHO DA ARESTA ENTRE DOIS VÉRTICES
-	# 100 - Número mágico que é maior que todas os fragmentos
 	def dist(a, b):
 		for i in range(0, len(b), 1):
 			if (a.endswith(b[0:len(b) - i])):
-				return  1000 - (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
-		return 1000 #
+				return  (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
+		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
 	solver = pantspath.Solver(rho = 0.1, limit = 10, ant_count = 10)
@@ -34,7 +33,7 @@ def solve(fragFileName, outputFile):
 	#outputFile.write("Nodes: " +  str(nodes))
 	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
 	outputFile.write("Tamanho da solução: " +  str(solution.distance))
-	outputFile.write("Tamanho da solução: " +  str(-(solution.distance - (1000 * len(nodes)))))
+
 
 	# Construi a SCS
 	scs = ""
@@ -43,7 +42,7 @@ def solve(fragFileName, outputFile):
 		f = edge.start
 		# Não considero o utlimo nó pois ele vai ser o primeiro
 		end = edge.end
-		scs = scs + f[0:len(f) - (1000 - edge.length)]
+		scs = scs + f[0:len(f) - int(edge.length)]
 		#print("Aresta", f[0:len(f) - (100 - edge.length)])
 
 	# Adiciono o sufixo da ultima palavra

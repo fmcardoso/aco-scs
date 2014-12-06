@@ -264,12 +264,13 @@ class Ant:
         The weight of an edge is simply a representation of its perceived value
         in finding a shorter solution. Larger weights increase the odds of the
         edge being taken, whereas smaller weights decrease those odds.
-        
+            EDIT 06/12 (L. Farris): Changed the weigth function, so ants will be more inclined to move to heavier
+            edges. So ants will now look for longer solutions, since egdes with larger length will mean a larger weigth.
         :param Edge edge: the edge to weigh
         :return: the weight of *edge*
         :rtype: float
         """
-        pre = 1 / (edge.length or 1)
+        pre = (edge.length or 0.0001)
         post = edge.pheromone
         return post ** self.alpha * pre ** self.beta
 

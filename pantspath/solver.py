@@ -84,12 +84,12 @@ class Solver:
         :func:`solve` or :func:`solutions`.
         
         :param list colony: the `Ant`\s to use in finding a solution
-        :return: the best solution found
+        :return: the best solution found (L. Farris - the best here is the largest, therefore the last element)
         :rtype: :class:`Ant`
         """
         self.find_solutions(colony)
         self.global_update(colony)
-        return sorted(colony)[0]
+        return sorted(colony)[-1]
         
     def solve(self, world):
         """Return the single shortest path found through the given *world*.
@@ -104,7 +104,7 @@ class Solver:
         for i in range(self.limit):
             self.reset_colony(colony)
             local_best = self.aco(colony)
-            if global_best is None or local_best < global_best:
+            if global_best is None or local_best > global_best:
                 global_best = copy(local_best)
             self.trace_elite(global_best)
         return global_best
@@ -125,7 +125,7 @@ class Solver:
         for i in range(self.limit):
             self.reset_colony(colony)
             local_best = self.aco(colony)
-            if global_best is None or local_best < global_best:
+            if global_best is None or local_best > global_best:
                 global_best = copy(local_best)
                 yield global_best
             self.trace_elite(global_best)
@@ -254,11 +254,9 @@ class Solver:
         """
         ants = sorted(ants)[:len(ants) // 2]
         for a in ants:
-            p = self.q / a.distance
+            p = self.q * a.distance
             for edge in a.path:
-                edge.pheromone = max(
-                    self.t0,
-                    (1 - self.rho) * edge.pheromone + p)
+                edge.pheromone = max(self.t0, (1 - self.rho) * edge.pheromone + p)
 
     def trace_elite(self, ant):
         """Deposit pheromone along the path of a particular ant.
@@ -274,7 +272,7 @@ class Solver:
         :param Ant ant: the elite :class:`Ant`
         """
         if self.elite:
-            p = self.elite * self.q / ant.distance
+            p = self.elite * self.q * ant.distance
             for edge in ant.path:
                 edge.pheromone += p
     
