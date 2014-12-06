@@ -4,33 +4,35 @@ import random
 from random import randint
 
 def generate(fragmentsDir, genomeDir, id):
-	def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-	    return ''.join(random.choice(chars) for _ in range(size))
 
-	
-	# Gera sequência
-	genome = id_generator(1000, "ACTG")
-	
-	# Escreve sequência
-	file = open(genomeDir + str(id) + ".txt", "w")
-	file.write(genome)
-	file.close()
+    random.seed(1234 * id);
 
-	file = open(fragmentsDir + str(id) + ".txt", "w")
-	collection = [genome, genome, genome]
+    def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))
 
-	print("Tamanho Sequência Original:", len(genome))
+    # Gera sequência
+    genome = id_generator(1000, "ACTG")
 
-	added = []
+    # Escreve sequência
+    file = open(genomeDir + str(id) + ".txt", "w")
+    file.write(genome)
+    file.close()
 
-	for i in collection:
-	  x = 0
-	  while (x < len(i)):
-	    t = randint(25,40)
-	    fragment = i[x:x+t]
-	    x=x+t	
+    file = open(fragmentsDir + str(id) + ".txt", "w")
+    collection = [genome, genome, genome]
 
-	    if fragment not in added:
-		    file.write(fragment + "\n")
-		    added.append(fragment)
-	file.close()
+    print("Tamanho Sequência Original:", len(genome))
+
+    added = []
+
+    for i in collection:
+        x = 0
+        while (x < len(i)):
+            t = randint(25,40)
+            fragment = i[x:x+t]
+            x=x+t
+
+        if fragment not in added:
+            file.write(fragment + "\n")
+            added.append(fragment)
+    file.close()
