@@ -27,12 +27,12 @@ def solve(fragFileName, outputFile):
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver(rho = 0.1, limit = 10, ant_count = 10)
+	solver = pantspath.Solver()
 	solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))
 	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
-	outputFile.write("Tamanho da solução: " +  str(solution.distance))
+	outputFile.write("Distancia da solução: " +  str(solution.distance))
 
 
 	# Construi a SCS
@@ -47,4 +47,5 @@ def solve(fragFileName, outputFile):
 
 	# Adiciono o sufixo da ultima palavra
 	scs = scs + end
-	outputFile.write("SCS Solution:" + scs)
+	outputFile.write("\nSCS Solution Size: " + str(len(scs)) + "\n")
+	outputFile.write("\nSCS Solution:" + scs + "\n")

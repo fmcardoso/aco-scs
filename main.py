@@ -8,8 +8,8 @@ resultsDir = "gen/results/"
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
-for i in range(1, 10):
-	generator.generate(fragmentsDir, seqDir, i)
+#for i in range(1, 10):
+#	generator.generate(fragmentsDir, seqDir, i)
 
 
 
