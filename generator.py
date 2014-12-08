@@ -5,7 +5,7 @@ from random import randint
 
 def generate(fragmentsDir, genomeDir, id):
 
-    random.seed(1234 * id);
+    random.seed(1234 * id)
 
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -28,7 +28,7 @@ def generate(fragmentsDir, genomeDir, id):
     for i in collection:
         x = 0
         while (x < len(i)):
-            t = randint(35,50)
+            t = randint(25,40)
             fragment = i[x:x+t]
             x=x+t
 
