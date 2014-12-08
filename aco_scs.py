@@ -27,7 +27,7 @@ def solve(fragFileName, outputFile):
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver()
+	solver = pantspath.Solver(ant_count = 50)
 	solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))

@@ -28,11 +28,11 @@ def generate(fragmentsDir, genomeDir, id):
     for i in collection:
         x = 0
         while (x < len(i)):
-            t = randint(25,40)
+            t = randint(35,50)
             fragment = i[x:x+t]
             x=x+t
 
-        if fragment not in added:
-            file.write(fragment + "\n")
-            added.append(fragment)
+            if fragment not in added:
+                file.write(fragment + "\n")
+                added.append(fragment)
     file.close()
