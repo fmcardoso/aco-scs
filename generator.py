@@ -3,9 +3,10 @@ import string
 import random
 from random import randint
 
+
 def generate(fragmentsDir, genomeDir, id):
 
-    random.seed(1234 * id);
+    random.seed(1234 * id)
 
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -27,12 +28,11 @@ def generate(fragmentsDir, genomeDir, id):
 
     for i in collection:
         x = 0
-        while (x < len(i)):
-            t = randint(25,40)
+        while x < len(i):
+            t = randint(25, 40)
             fragment = i[x:x+t]
-            x=x+t
-
-        if fragment not in added:
-            file.write(fragment + "\n")
-            added.append(fragment)
+            x = x+t
+            if fragment not in added:
+                file.write(fragment + "\n")
+                added.append(fragment)
     file.close()
