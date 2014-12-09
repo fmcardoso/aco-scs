@@ -27,12 +27,22 @@ def solve(fragFileName, outputFile):
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver(ant_count = 50)
+	solver = pantspath.Solver(limit = 100, beta = 5, ant_count = 100)
 	solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))
 	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
 	outputFile.write("Distancia da solução: " +  str(solution.distance))
+	# Escrever aqui os parâmetros utilizados em cada execução
+	outputFile.write("\nParâmetros Utilizados:"  +
+		"\n\talpha: " + str(solver.alpha) +
+        "\n\tbeta: " + str(solver.beta) +
+        "\n\trho: " + str(solver.rho) +
+        "\n\tq: " + str(solver.q) +
+        "\n\tt0: " + str(solver.t0) +
+        "\n\tlimit: " + str(solver.limit) +
+        "\n\tant_count: " + str(solver.ant_count) +
+        "\n\telite: " + str(solver.elite))
 
 
 	# Construi a SCS

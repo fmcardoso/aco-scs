@@ -4,7 +4,7 @@ import aco_scs
 
 fragmentsDir = "gen/fragments/"
 seqDir = "gen/sequences/"
-resultsDir = "gen/results/"
+resultsDir = "results/"
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
