@@ -3,7 +3,7 @@ import string
 import random
 from random import randint
 
-def generate(fragmentsDir, genomeDir, id):
+def generate(fragmentsDir, genomeDir, id, genomeSize, fragmentSize):
 
     random.seed(1234 * id)
 
@@ -11,7 +11,7 @@ def generate(fragmentsDir, genomeDir, id):
         return ''.join(random.choice(chars) for _ in range(size))
 
     # Gera sequência
-    genome = id_generator(1000, "ACTG")
+    genome = id_generator(genomeSize, "ACTG")
 
     # Escreve sequência
     file = open(genomeDir + str(id) + ".txt", "w")
@@ -28,7 +28,7 @@ def generate(fragmentsDir, genomeDir, id):
     for i in collection:
         x = 0
         while (x < len(i)):
-            t = randint(25,40)
+            t = randint(fragmentSize, fragmentSize*1.2)
             fragment = i[x:x+t]
             x=x+t
 

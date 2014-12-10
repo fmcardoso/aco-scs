@@ -27,12 +27,12 @@ def solve(fragFileName, outputFile):
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver(limit = 100, beta = 5, ant_count = 100)
+	solver = pantspath.Solver(limit = 10, beta = 6, ant_count = 100)
 	solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))
 	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
-	outputFile.write("Distancia da solução: " +  str(solution.distance))
+	#outputFile.write("Distancia da solução: " +  str(solution.distance))
 	# Escrever aqui os parâmetros utilizados em cada execução
 	outputFile.write("\nParâmetros Utilizados:"  +
 		"\n\talpha: " + str(solver.alpha) +
@@ -57,5 +57,10 @@ def solve(fragFileName, outputFile):
 
 	# Adiciono o sufixo da ultima palavra
 	scs = scs + end
-	outputFile.write("\nSCS Solution Size: " + str(len(scs)) + "\n")
-	outputFile.write("\nSCS Solution:" + scs + "\n")
+
+	result = len(scs)
+
+	outputFile.write("\nACO: SCS Solution Size: " + str(result) + "\n")
+	#outputFile.write("\nSCS Solution:" + scs + "\n")
+
+	return result
