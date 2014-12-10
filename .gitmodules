@@ -1,3 +1,0 @@
-[submodule "Levenshtein"]
-	path = Levenshtein
-	url = https://github.com/ztane/python-Levenshtein.git
