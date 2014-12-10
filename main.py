@@ -8,7 +8,7 @@ resultsDir = "results/"
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
-for i in range(1, 10):
+for i in range(1, 3):
 	generator.generate(fragmentsDir, seqDir, i)
 
 
@@ -31,4 +31,4 @@ with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 		outputFile.write("\n-----------------------------------\n")
 		outputFile.write("Execução " + frag)
 		outputFile.write("\n-----------------------------------\n")
-		aco_scs.solve(fragmentsDir + frag, outputFile)
+		aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag)

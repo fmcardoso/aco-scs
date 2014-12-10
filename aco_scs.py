@@ -1,7 +1,9 @@
 #!/usr/bin/python3
-import pantspath
 
-def solve(fragFileName, outputFile):
+import pantspath
+from levenshtein import levenshtein
+
+def solve(fragFileName, outputFile, seqFileName):
 	nodes = []
 
 	fragFile = open(fragFileName, "r")
@@ -27,7 +29,7 @@ def solve(fragFileName, outputFile):
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
 	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver(limit = 100, beta = 5, ant_count = 100)
+	solver = pantspath.Solver()
 	solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))
@@ -59,3 +61,6 @@ def solve(fragFileName, outputFile):
 	scs = scs + end
 	outputFile.write("\nSCS Solution Size: " + str(len(scs)) + "\n")
 	outputFile.write("\nSCS Solution:" + scs + "\n")
+	seqFile = open(seqFileName, "r")
+	sequence = seqFile.readlines()
+	outputFile.write("\nLevenshtein Distance = " + str(levenshtein.levenshteinDistance(scs, sequence[0])));
