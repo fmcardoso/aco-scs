@@ -14,9 +14,9 @@ import plot_helper as ph
 
 ts = time.time()
 
-seqSize = 500
-fragmentSize = 60
-coverage = 1
+seqSize = 1000
+fragmentSize = 50
+coverage = 5
 
 fragmentsDir = "gen/fragments/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 seqDir = "gen/sequences/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"

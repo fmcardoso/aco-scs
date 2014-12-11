@@ -72,6 +72,33 @@ def hasCycle(digraph, edge):
     return False
   else: return True
 
+def hasCycle2(trees, edge):
+    sT = False
+    sS = False
+    
+    for t in trees:
+        if edge.source in t and edge.target in t:
+            return True
+        elif edge.target in t:
+            sT = t
+        elif edge.source in t:
+            sS = t
+    
+    if sT == False and sS == False:
+        trees.append([edge.source, edge.target])
+    elif sT != False and sS != False:
+        sS.extend(sT)
+        trees.remove(sT)
+    elif sT != False:
+        sT2 = [edge.source]
+        trees.remove(sT)
+        sT2.extend(sT)
+        trees.append(sT2)
+    elif sS != False:
+        sS = sS.append(edge.target)
+        
+    return False
+
 def join(finalSolution, graph):
   if (len(finalSolution) > 1):
     for solution in finalSolution:
@@ -106,64 +133,70 @@ def assembyFragment(path, nodes, graph):
   return finalSolution
 
 def solve(fragFileName, outputFile, seqFileName):
-  nodes = []
+    nodes = []
   
-  fragFile = open(fragFileName, "r")
-  fragments = fragFile.readlines()
-  fragments = [x.strip('\n') for x in fragments]
-  for frag in fragments:
-    included = False
-    for existing in nodes:
-        if frag in existing:
-            included = True
-            break
-          
-    if not included:
-        nodes.append(frag)
-  fragFile.close()
+    fragFile = open(fragFileName, "r")
+    fragments = fragFile.readlines()
+    fragments = [x.strip('\n') for x in fragments]
+    for frag in fragments:
+        included = False
+        for existing in nodes:
+            if frag in existing:
+                included = True
+                break
+            
+        if not included:
+            nodes.append(frag)
+    fragFile.close()
 
-  graph = build_graph(nodes)
+  # XXX - VÉRTICES DO GRAFO
+    # SLIDES - Peso solução otima: 3 + 3 + 4 + 4 = 14
+#   nodes.append('ACTACAC')
+#   nodes.append('CACTCAGGCA')
+#   nodes.append('GCATTCACTA')
+#   nodes.append('ACTAGAAATATA')
+#   nodes.append('TATACCAGC')
 
-  ###GRAFO UTILIZADO PARA VERIFICAR A EXISTÊNCIA DE CICLO
-  digraph = build_graph_to_find_cycle(nodes)
-  # print('Graph: ', graph, '\n')
+    graph = build_graph(nodes)
 
-  path = Graph([])
+#     print('Graph: ', graph.edges, '\n')
 
-  #### ENCONTRAR CAMINHO HAMILTONIANO
-  for edge in graph.edges:
-    for x in path.edges:
-        if edge.source == x.source:
-          edge.valid = False
-        else:
-          if edge.target == x.target:
+    path = Graph([])
+    trees = []
+    
+    #### ENCONTRAR CAMINHO HAMILTONIANO
+    for edge in graph.edges:
+        for x in path.edges:
+            if edge.source == x.source:
+                edge.valid = False
+            elif edge.target == x.target:
+                edge.valid = False
+
+        if edge.valid and hasCycle2(trees, edge):
             edge.valid = False
-          else:
-            if hasCycle(copy.deepcopy(digraph), copy.deepcopy(edge)):
-              edge.valid = False
+    
+        if (edge.valid):
+            path.edges.append(edge)
+        if edge.source not in path.vertexes:
+            path.vertexes.append(edge.source)
+        if edge.target not in path.vertexes: 
+            path.vertexes.append(edge.target)
+        
+        if len(nodes) == len(path.edges) + 1:
+            break
+    
+ 
+    #### MONTAR A SEQUENCIA ORIGINAL
+    assembledSequence = assembyFragment(copy.deepcopy(path), nodes, graph)
+    # Tamanho da solução
+    result = len(assembledSequence[0].sequence)
+    
+    # Distância da solução
+    seqFile = open(seqFileName, "r")
+    sequence = seqFile.readlines()
+    dist = levenshtein.levenshteinDistance(assembledSequence[0].sequence, sequence[0])
 
-    if (edge.valid):
-      path.edges.append(edge)
-      digraph.add_edge((edge.source,edge.target), edge.weight)
-
-      if edge.source not in path.vertexes:
-        path.vertexes.append(edge.source)
-      if edge.target not in path.vertexes: 
-        path.vertexes.append(edge.target)
-
-  #### MONTAR A SEQUENCIA ORIGINAL
-  assembledSequence = assembyFragment(copy.deepcopy(path), nodes, graph)
-
-  # Tamanho da solução
-  result = len(assembledSequence[0].sequence)
-  
-  # Distância da solução
-  seqFile = open(seqFileName, "r")
-  sequence = seqFile.readlines()
-  dist = levenshtein.levenshteinDistance(assembledSequence[0].sequence, sequence[0])
-
-  outputFile.write('\nGreedy: Tamanho da sequencia montada: ' + str(result))
-  outputFile.write("\nnGreedy: Levenshtein Distance = " + 
+    outputFile.write('\nGreedy: Tamanho da sequencia montada: ' + str(result))
+    outputFile.write("\nnGreedy: Levenshtein Distance = " + 
     str(dist));
-
-  return result, dist
+    return result, dist
