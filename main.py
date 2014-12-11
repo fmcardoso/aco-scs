@@ -1,17 +1,21 @@
 #!/usr/bin/python3
 import generator
 import aco_scs
+import scs_greedy
+import matplotlib.pyplot as plt
+
 
 fragmentsDir = "gen/fragments/"
 seqDir = "gen/sequences/"
-resultsDir = "results/"
+resultsDir = "gen/results/"
+seqSize = 1000
+fragmentSize = 50
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
-for i in range(1, 3):
-	generator.generate(fragmentsDir, seqDir, i)
 
-
+for i in range(1, 10):
+	generator.generate(fragmentsDir, seqDir, i, seqSize, fragmentMaxSize=fragmentSize,fragmentMinSize=fragmentSize-15)
 
 from os import listdir
 from os.path import isfile, join
@@ -21,7 +25,13 @@ import time
 ts = time.time()
 
 import datetime
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
+st = str(seqSize) + "-" + str(fragmentSize) #datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
+
+acoData = ""
+scsData = ""
+
+acoVector = []
+scsVector = []
 
 with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 	# Lista os arquivos de fragmentos
@@ -31,4 +41,23 @@ with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 		outputFile.write("\n-----------------------------------\n")
 		outputFile.write("Execução " + frag)
 		outputFile.write("\n-----------------------------------\n")
+
 		aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag)
+
+		acoS = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag)
+		scsS = scs_greedy.solve(fragmentsDir + frag, outputFile)
+		acoVector.append(acoS / seqSize)
+		scsVector.append(scsS /seqSize)
+		acoData = acoData + str(acoS) + " "
+		scsData = scsData + str(scsS) + " "
+
+
+with open(resultsDir + str(st) + ".csv", "a") as outputFile:
+	outputFile.write(acoData + "\n")
+	outputFile.write(scsData + "\n")
+
+plt.plot(acoVector, linewidth=2)
+plt.plot(scsVector, linewidth=2)
+plt.ylabel('Resultado/Tamanho Original')
+plt.xlabel('Tamanho Sequências')
+plt.savefig(resultsDir + str(st) + ".png")
