@@ -2,6 +2,7 @@
 
 import pantspath
 from levenshtein import levenshtein
+import aco_solver 
 
 def solve(fragFileName, outputFile, seqFileName):
 	nodes = []
@@ -35,23 +36,24 @@ def solve(fragFileName, outputFile, seqFileName):
 				return  (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
-	world = pantspath.World(nodes, dist)
-	solver = pantspath.Solver(limit = 10, beta = 6, ant_count = 100)
-	solution = solver.solve(world)
+	solution = aco_solver.solve(nodes, dist)
+	#world = pantspath.World(nodes, dist)
+	#solver = pantspath.Solver(rho = 0.2)
+	#solution = solver.solve(world)
 
 	#outputFile.write("Nodes: " +  str(nodes))
 	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
 	#outputFile.write("Distancia da solução: " +  str(solution.distance))
 	# Escrever aqui os parâmetros utilizados em cada execução
-	outputFile.write("\nParâmetros Utilizados:"  +
-		"\n\talpha: " + str(solver.alpha) +
-        "\n\tbeta: " + str(solver.beta) +
-        "\n\trho: " + str(solver.rho) +
-        "\n\tq: " + str(solver.q) +
-        "\n\tt0: " + str(solver.t0) +
-        "\n\tlimit: " + str(solver.limit) +
-        "\n\tant_count: " + str(solver.ant_count) +
-        "\n\telite: " + str(solver.elite))
+# 	outputFile.write("\nParâmetros Utilizados:"  +
+# 		"\n\talpha: " + str(solver.alpha) +
+#         "\n\tbeta: " + str(solver.beta) +
+#         "\n\trho: " + str(solver.rho) +
+#         "\n\tq: " + str(solver.q) +
+#         "\n\tt0: " + str(solver.t0) +
+#         "\n\tlimit: " + str(solver.limit) +
+#         "\n\tant_count: " + str(solver.ant_count) +
+#         "\n\telite: " + str(solver.elite))
 
 
 	# Construi a SCS
