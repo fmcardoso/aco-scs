@@ -2,8 +2,8 @@
 import generator
 import aco_scs
 import scs_greedy
-import matplotlib.pyplot as plt
-
+import os
+#import matplotlib.pyplot as plt
 
 fragmentsDir = "gen/fragments/"
 seqDir = "gen/sequences/"
@@ -32,6 +32,11 @@ scsData = ""
 acoVector = []
 scsVector = []
 
+csvFileName = "results/csvFile"
+
+# Remove o arquivo de saída caso exista
+os.remove(resultsDir + str(st) + ".txt") if os.path.exists(resultsDir + str(st) + ".txt") else None
+
 with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 	# Lista os arquivos de fragmentos
 	fragFiles = [ f for f in listdir(fragmentsDir) if isfile(join(fragmentsDir,f)) ]
@@ -52,10 +57,10 @@ with open(resultsDir + str(st) + ".csv", "a") as outputFile:
 	outputFile.write(acoData + "\n")
 	outputFile.write(scsData + "\n")
 
-plt.plot(acoVector, linewidth=2)
-plt.plot(scsVector, linewidth=2)
-plt.ylabel('Resultado/Tamanho Original')
-plt.xlabel('Tamanho Sequências')
-plt.savefig(resultsDir + str(st) + ".png")
+#plt.plot(acoVector, linewidth=2)
+#plt.plot(scsVector, linewidth=2)
+#plt.ylabel('Resultado/Tamanho Original')
+#plt.xlabel('Tamanho Sequências')
+#plt.savefig(resultsDir + str(st) + ".png")
 
 

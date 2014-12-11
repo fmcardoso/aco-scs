@@ -32,7 +32,7 @@ def generate(fragmentsDir, genomeDir, id, genomeSize, fragmentSize):
             fragment = i[x:x+t]
             x=x+t
 
-            if fragment not in added:
-                file.write(fragment + "\n")
-                added.append(fragment)
+            if (fragment not in added):
+            	file.write(fragment + "\n")
+            	added.append(fragment)
     file.close()

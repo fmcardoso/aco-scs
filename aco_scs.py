@@ -8,7 +8,14 @@ def solve(fragFileName, outputFile):
 	fragments = fragFile.readlines()
 	fragments = [x.strip('\n') for x in fragments]
 	for frag in fragments:
-	    nodes.append(frag)
+	    included = False
+	    for existing in nodes:
+    		if frag in existing:
+    			included = True
+    			break
+	    if not included:
+		    nodes.append(frag)
+
 	fragFile.close()
 
 	# XXX - VÉRTICES DO GRAFO
