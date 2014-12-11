@@ -67,12 +67,16 @@ def solve(fragFileName, outputFile, seqFileName):
 	# Adiciono o sufixo da ultima palavra
 	scs = scs + end
 
+	# Tamanho solução
 	result = len(scs)
+	
+	# Distancia da solução
+	seqFile = open(seqFileName, "r")
+	sequence = seqFile.readlines()
+	dist = levenshtein.levenshteinDistance(scs, sequence[0])
 
 	outputFile.write("\nACO: SCS Solution Size: " + str(result) + "\n")
 	#outputFile.write("\nSCS Solution:" + scs + "\n")
-	seqFile = open(seqFileName, "r")
-	sequence = seqFile.readlines()
-	outputFile.write("\nLevenshtein Distance = " + str(levenshtein.levenshteinDistance(scs, sequence[0])));
+	outputFile.write("\nACO: Levenshtein Distance = " + str(dist));
 
-	return result
+	return result, dist

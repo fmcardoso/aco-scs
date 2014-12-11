@@ -4,7 +4,7 @@ import random
 import math
 from random import randint
 
-def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 10):
+def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 2):
 
     random.seed(1234 * id)
     # queremos uma cobertura de 10 vezes pelo menos
@@ -17,11 +17,11 @@ def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 3
     genome = id_generator(genomeSize, "ACTG")
 
     # Escreve sequência
-    file = open(genomeDir + str(id) + ".txt", "w")
+    file = open(genomeDir + str(id) + ".txt", "w+")
     file.write(genome)
     file.close()
 
-    file = open(fragmentsDir + str(id) + ".txt", "w")
+    file = open(fragmentsDir + str(id) + ".txt", "w+")
 
     print("Tamanho Sequência Original:", len(genome))
 

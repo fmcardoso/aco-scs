@@ -3,6 +3,7 @@ import operator
 import copy
 from pygraph.classes.digraph import digraph
 from pygraph.algorithms.cycles import find_cycle
+from levenshtein import levenshtein
 
 class Edge:
   def __init__(self, source, target, weight):
@@ -104,14 +105,21 @@ def assembyFragment(path, nodes, graph):
   join(finalSolution, graph)
   return finalSolution
 
-def solve(fragFileName, outputFile):
+def solve(fragFileName, outputFile, seqFileName):
   nodes = []
   
   fragFile = open(fragFileName, "r")
   fragments = fragFile.readlines()
   fragments = [x.strip('\n') for x in fragments]
   for frag in fragments:
-      nodes.append(frag)
+    included = False
+    for existing in nodes:
+        if frag in existing:
+            included = True
+            break
+          
+    if not included:
+        nodes.append(frag)
   fragFile.close()
 
   graph = build_graph(nodes)
@@ -146,8 +154,16 @@ def solve(fragFileName, outputFile):
   #### MONTAR A SEQUENCIA ORIGINAL
   assembledSequence = assembyFragment(copy.deepcopy(path), nodes, graph)
 
+  # Tamanho da solução
   result = len(assembledSequence[0].sequence)
+  
+  # Distância da solução
+  seqFile = open(seqFileName, "r")
+  sequence = seqFile.readlines()
+  dist = levenshtein.levenshteinDistance(assembledSequence[0].sequence, sequence[0])
 
   outputFile.write('\nGreedy: Tamanho da sequencia montada: ' + str(result))
+  outputFile.write("\nnGreedy: Levenshtein Distance = " + 
+    str(dist));
 
-  return result
+  return result, dist
