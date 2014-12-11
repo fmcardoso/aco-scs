@@ -1,7 +1,9 @@
 #!/usr/bin/python3
-import pantspath
 
-def solve(fragFileName, outputFile):
+import pantspath
+from levenshtein import levenshtein
+
+def solve(fragFileName, outputFile, seqFileName):
 	nodes = []
 
 	fragFile = open(fragFileName, "r")
@@ -69,5 +71,8 @@ def solve(fragFileName, outputFile):
 
 	outputFile.write("\nACO: SCS Solution Size: " + str(result) + "\n")
 	#outputFile.write("\nSCS Solution:" + scs + "\n")
+	seqFile = open(seqFileName, "r")
+	sequence = seqFile.readlines()
+	outputFile.write("\nLevenshtein Distance = " + str(levenshtein.levenshteinDistance(scs, sequence[0])));
 
 	return result

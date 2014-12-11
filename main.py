@@ -8,13 +8,13 @@ import os
 fragmentsDir = "gen/fragments/"
 seqDir = "gen/sequences/"
 resultsDir = "gen/results/"
-seqSize = 1000
-fragmentSize = 50
+seqSize = 50
+fragmentSize = 5
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
 for i in range(1, 10):
-	generator.generate(fragmentsDir, seqDir, i, seqSize, fragmentSize)
+	generator.generate(fragmentsDir, seqDir, i, seqSize, fragmentMaxSize=fragmentSize,fragmentMinSize=fragmentSize-15)
 
 from os import listdir
 from os.path import isfile, join
@@ -32,11 +32,6 @@ scsData = ""
 acoVector = []
 scsVector = []
 
-csvFileName = "results/csvFile"
-
-# Remove o arquivo de saída caso exista
-os.remove(resultsDir + str(st) + ".txt") if os.path.exists(resultsDir + str(st) + ".txt") else None
-
 with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 	# Lista os arquivos de fragmentos
 	fragFiles = [ f for f in listdir(fragmentsDir) if isfile(join(fragmentsDir,f)) ]
@@ -45,8 +40,10 @@ with open(resultsDir + str(st) + ".txt", "a") as outputFile:
 		outputFile.write("\n-----------------------------------\n")
 		outputFile.write("Execução " + frag)
 		outputFile.write("\n-----------------------------------\n")
-		acoS = aco_scs.solve(fragmentsDir + frag, outputFile)
+
+		acoS = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag)
 		scsS = scs_greedy.solve(fragmentsDir + frag, outputFile)
+		
 		acoVector.append(acoS / seqSize)
 		scsVector.append(scsS /seqSize)
 		acoData = acoData + str(acoS) + " "

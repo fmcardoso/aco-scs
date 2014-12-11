@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 import string
 import random
+import math
 from random import randint
 
-def generate(fragmentsDir, genomeDir, id, genomeSize, fragmentSize):
+def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 2):
 
     random.seed(1234 * id)
+    # queremos uma cobertura de 10 vezes pelo menos
+    numFragments = math.ceil((genomeSize / fragmentMinSize) * coverage)
 
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -19,20 +22,15 @@ def generate(fragmentsDir, genomeDir, id, genomeSize, fragmentSize):
     file.close()
 
     file = open(fragmentsDir + str(id) + ".txt", "w")
-    collection = [genome, genome, genome]
 
     print("Tamanho Sequência Original:", len(genome))
 
     added = []
 
-    for i in collection:
-        x = 0
-        while (x < len(i)):
-            t = randint(fragmentSize, fragmentSize*1.2)
-            fragment = i[x:x+t]
-            x=x+t
-
-            if (fragment not in added):
-            	file.write(fragment + "\n")
-            	added.append(fragment)
+    for i in range (0, numFragments):
+        index = randint(0, genomeSize - fragmentMaxSize)
+        fragment = genome[index:index+randint(fragmentMinSize, fragmentMaxSize)]
+        if (fragment not in added):
+            file.write(fragment + "\n")
+            added.append(fragment)
     file.close()
