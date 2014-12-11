@@ -15,8 +15,9 @@ def solve(fragFileName, outputFile, seqFileName):
 			if frag in existing:
 				included = True
 				break
-			if not included:
-				nodes.append(frag)
+			
+		if not included:
+			nodes.append(frag)
 	fragFile.close()
 
 	# XXX - VÉRTICES DO GRAFO

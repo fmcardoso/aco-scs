@@ -4,7 +4,7 @@ import random
 import math
 from random import randint
 
-def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 2):
+def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 10):
 
     random.seed(1234 * id)
     # queremos uma cobertura de 10 vezes pelo menos
