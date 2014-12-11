@@ -8,17 +8,21 @@ from os import listdir
 from os.path import isfile, join
 import datetime
 import time
-from cProfile import label
+import json
+import numpy as np
+import plot_helper as ph
 
 ts = time.time()
 
-seqSize = 1000
+seqSize = 500
 fragmentSize = 60
-coverage = 10
+coverage = 1
 
 fragmentsDir = "gen/fragments/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 seqDir = "gen/sequences/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 resultsDir = "gen/results/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
+dataPath = "results/data.json"
+plotPath = "results/chart"
 
 # Cria as pastas caso não existam
 if not os.path.exists(os.path.dirname(fragmentsDir)):
@@ -27,6 +31,8 @@ if not os.path.exists(os.path.dirname(seqDir)):
 	os.makedirs(os.path.dirname(seqDir))
 if not os.path.exists(os.path.dirname(resultsDir)):
 	os.makedirs(os.path.dirname(resultsDir))
+if not os.path.exists(os.path.dirname(dataPath)):
+	os.makedirs(os.path.dirname(dataPath))
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
@@ -48,6 +54,7 @@ scsSizeVector = []
 acoDistVector = []
 scsDistVector = []
 
+# Calcula as soluções e as escreve em um arquivo de texto
 with open(resultsDir + str(st) + ".txt", "a+") as outputFile:
 	# Lista os arquivos de fragmentos
 	fragFiles = [ f for f in listdir(fragmentsDir) if isfile(join(fragmentsDir,f)) ]
@@ -71,29 +78,40 @@ with open(resultsDir + str(st) + ".txt", "a+") as outputFile:
 		acoSizeData = acoSizeData + str(acoS) + " "
 		scsSizeData = scsSizeData + str(scsS) + " "
 
-
+# Escreve as soluções em um csv por garantia
 with open(resultsDir + str(st) + ".csv", "a+") as outputFile:
 	outputFile.write(acoSizeData + "\n")
 	outputFile.write(scsSizeData + "\n")
+	
+# Arquivo de dados JSON
+# Inicialização para caso arquivo esteja vazio.
+data = json.loads('{"tam": {"aco": {"' + st + '":0}, "gdy": {"' + st + '":0}}, "dist":{"aco": {"' + st + '":0}, "gdy": {"' + st + '":0}}}')
+try:
+	with open(dataPath, "r") as dataFile:
+		data = json.load(dataFile)
+except ValueError:
+	pass
 
-# Plota grafico de tamanhos
-plt.figure(1)
-plt.plot(acoSizeVector, linewidth=2, label = "Nosso")
-plt.plot(scsSizeVector, linewidth=2, label = "Inimigo")
-plt.legend(loc=2);
-plt.ylabel('Disparidade do Tamanho')
-plt.xlabel('Tamanho Sequências')
-plt.savefig(resultsDir + str(st) + "-tam.png")
+# Escreve as médias de tamanho
+tamData = data["tam"]
+tamData["aco"][st] = np.mean(acoSizeVector)
+tamData["gdy"][st] = np.mean(scsSizeVector)
 
-# Plota grafico de distância de edição
-plt.figure(2)
-plt.plot(acoDistVector, linewidth=2, label = "Nosso")
-plt.plot(scsDistVector, linewidth=2, label = "Inimigo")
-plt.legend(loc=2);
-plt.ylabel('Distância de Edição')
-plt.xlabel('Tamanho Sequências')
-plt.savefig(resultsDir + str(st) + "-dist.png")
+# Escreve as médias de distância
+distData = data["dist"]
+distData["aco"][st] = np.mean(acoDistVector)
+distData["gdy"][st] = np.mean(scsDistVector)
 
+# Salva as médias da execução
+with open(dataPath, 'w') as dataFile:
+	json.dump(data, dataFile)
+
+# Plota os graficos da execucao
+ph.plotExecution(acoSizeVector, scsSizeVector, acoDistVector, scsDistVector,
+				 resultsDir + str(st))
+
+# Plota os graficos gerais
+ph.plotAll(data, plotPath)
 
 print("---- Fim Execução ----")
 
