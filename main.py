@@ -3,13 +3,13 @@ import generator
 import aco_scs
 import scs_greedy
 import os
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 fragmentsDir = "gen/fragments/"
 seqDir = "gen/sequences/"
 resultsDir = "gen/results/"
-seqSize = 50
-fragmentSize = 5
+seqSize = 1000
+fragmentSize = 60
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
@@ -54,10 +54,12 @@ with open(resultsDir + str(st) + ".csv", "a") as outputFile:
 	outputFile.write(acoData + "\n")
 	outputFile.write(scsData + "\n")
 
-#plt.plot(acoVector, linewidth=2)
-#plt.plot(scsVector, linewidth=2)
-#plt.ylabel('Resultado/Tamanho Original')
-#plt.xlabel('Tamanho Sequências')
-#plt.savefig(resultsDir + str(st) + ".png")
+plt.plot(acoVector, linewidth=2)
+plt.plot(scsVector, linewidth=2)
+plt.ylabel('Resultado/Tamanho Original')
+plt.xlabel('Tamanho Sequências')
+plt.savefig(resultsDir + str(st) + ".png")
+
+print("---- Fim Execução ----")
 
 
