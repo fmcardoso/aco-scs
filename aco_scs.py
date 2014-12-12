@@ -4,7 +4,7 @@ import pantspath
 from levenshtein import levenshtein
 import aco_solver 
 
-def solve(fragFileName, outputFile, seqFileName):
+def solve(fragFileName, outputFile, seqFileName, pathTrees):
 	nodes = []
 
 	fragFile = open(fragFileName, "r")
@@ -36,7 +36,7 @@ def solve(fragFileName, outputFile, seqFileName):
 				return  (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
 		return 0.0001 #Numero muito pequeno tendendo a zero
 
-	solution = aco_solver.solve(nodes, dist)
+	solution = aco_solver.solve(nodes, dist, 100, 10, pathTrees)
 	#world = pantspath.World(nodes, dist)
 	#solver = pantspath.Solver(rho = 0.2)
 	#solution = solver.solve(world)

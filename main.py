@@ -64,8 +64,9 @@ with open(resultsDir + str(st) + ".txt", "a+") as outputFile:
 		outputFile.write("Execução " + frag)
 		outputFile.write("\n-----------------------------------\n")
 
-		acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag)
-		scsS, scsD = scs_greedy.solve(fragmentsDir + frag, outputFile, seqDir + frag)
+		scsS, scsD, pathTrees = scs_greedy.solve(fragmentsDir + frag, outputFile, seqDir + frag)
+		acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag, pathTrees[0])
+
 		
 		# Vetores com dados de tamanho
 		acoSizeVector.append(abs((acoS - seqSize)) / seqSize)

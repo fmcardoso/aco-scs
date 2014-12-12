@@ -199,4 +199,4 @@ def solve(fragFileName, outputFile, seqFileName):
     outputFile.write('\nGreedy: Tamanho da sequencia montada: ' + str(result))
     outputFile.write("\nnGreedy: Levenshtein Distance = " + 
     str(dist));
-    return result, dist
+    return result, dist, trees
