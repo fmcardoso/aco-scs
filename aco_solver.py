@@ -18,6 +18,7 @@ class Solution:
         self.pathSize = pathSize
 
 def choose_start(startList):
+
     total = 0
     for i in range(len(startList)):
         total += startList[i]
@@ -25,7 +26,7 @@ def choose_start(startList):
     r = random.uniform(0, total)
     upto = 0
     for i in range(len(startList)):
-        if upto + startList[i] > r:
+        if upto + startList[i] >= r:
             return i
         upto +=  startList[i]
     assert False, "Erro start!!!"
@@ -33,23 +34,39 @@ def choose_start(startList):
 
 # Delta [0 ... 1], quando mais proximo de 0, mais ele privilegia o peso da aresta
 # quanto mais proximo de 1 o contrario
-def weighted_choice(phoM, choices, delta = 0.7):
-    total = 0
-    for e in choices:
-        total += e.length * delta * phoM[e.start, e.end] / delta
-    #total = sum(e.length for e in choices)
+
+"""
+ Escolhe a aresta mais pesada em forma de roleta.
+"""
+def weighted_choice(choices):
+    total = sum(e.length for e in choices)
     r = random.uniform(0, total)
     upto = 0
     for e in choices:
-        if upto + e.length * delta * phoM[e.start, e.end] / delta >= r:
+        if upto + e.length >= r:
             return e
-        upto += e.length * delta * phoM[e.start, e.end] / delta
+        upto += e.length
     assert False, "Erro weighted_choice!!!"
+"""
+ Retorna a melhor escolha dentro das possiveis
+"""
+def maximalChoice(choices):
+    bestV = 0
+    bestE = 0
+    
+    for e in choices:
+        if e.length >= bestV:
+            bestE = e
+            bestV = e.length
+    
+    return bestE
    
-def createChoices(start, unvisited, distM):
+def createChoices(start, unvisited, distM, phoM, beta):
     choices = []
     for end in unvisited:
-        choices.append(Edge(start, end, distM[start, end]))
+        # Arestas de tamanho -1 não são consideradas
+        if (distM[start, end] > -1):
+            choices.append(Edge(start, end, (distM[start, end]  ** beta) * phoM[start, end]))
     return choices
     
 def antWalk(nodes, nodesSize, distM, phoM, startList):
@@ -59,7 +76,6 @@ def antWalk(nodes, nodesSize, distM, phoM, startList):
     unvisited.remove(i)
     j = random.choice(unvisited)
     unvisited.remove(j)
-    
     visited = [i, j]
    
     path = [Edge(i, j, distM[i, j])]
@@ -68,6 +84,11 @@ def antWalk(nodes, nodesSize, distM, phoM, startList):
     while len(unvisited) > 0:
         i = j
         j = step(j, unvisited, distM, phoM)
+        
+        # Verifica se não há mais caminhos válidos
+        if (j < 0):
+            return None, -1
+        
         visited.append(j)
         unvisited.remove(j)
         path.append(Edge(i, j, distM[i, j]))
@@ -75,8 +96,18 @@ def antWalk(nodes, nodesSize, distM, phoM, startList):
 
     return path, pathSize
 
-def step(start, unvisited, distM, phoM):
-    return weighted_choice(phoM, createChoices(start, unvisited, distM)).end
+def step(start, unvisited, distM, phoM, beta = 0.8, q0 = 0.9):
+    choices = createChoices(start, unvisited, distM, phoM, beta)
+    
+    if len(choices) == 0:
+        return -1
+    
+    q = random.random()
+
+    if q <= q0:
+        return maximalChoice(choices).end
+    else:
+        return weighted_choice(choices).end
 
 def buildSolutionByPath(initialPath, distM, phoM, startList, phomDeposited):
     solution = Solution([], 0)
@@ -94,20 +125,24 @@ def buildSolutionByPath(initialPath, distM, phoM, startList, phomDeposited):
 
 def finishAntWalk(phoM, startList, bestSolution, decaimento, phomDeposited):
     for edge in bestSolution.path:
-        phoM[edge.start,edge.end] += phomDeposited * 5
-        startList[edge.start] += phomDeposited * 5
+        phoM[edge.start,edge.end] += phomDeposited
+        startList[edge.start] += phomDeposited
     
     for index, v in np.ndenumerate(phoM):
-        phoM[index] = v / decaimento
+        phoM[index] = max(v / decaimento, phomDeposited)
         
     for start in startList:
-        start = start / decaimento
+        start = max(start / decaimento, phomDeposited)
+        
 """
 Executa colonia de formigas em busca do caminho hamiltoniano de maior peso
 """
-def solve(nodes, dist, nAnts = 100, iterations = 4, initialPath = [],
-          phomDeposited = 0.1, decaimento = 1.1):
+def solve(nodes, dist, nAnts = 100, iterations = 10, initialPath = [],
+          phomDeposited = 1, decaimento = 1.05):
     nodesSize = len(nodes)
+    
+    # Reseta a seed do random
+    random.seed()
     
     distM = np.zeros((nodesSize, nodesSize))
     phoM = np.zeros((nodesSize, nodesSize))
@@ -123,10 +158,10 @@ def solve(nodes, dist, nAnts = 100, iterations = 4, initialPath = [],
         solution = buildSolutionByPath(initialPath, distM, phoM, startList,
                                        phomDeposited)
     else:
-        solution = Solution([], 0)
+        solution = Solution([], 1)
         
     print("Inicialização", solution.pathSize)
-        
+    invalid = 0
     # Executa determinado numero de interações zerando os parametros
     for j in range(iterations):
         phoM[:] = phomDeposited
@@ -137,27 +172,30 @@ def solve(nodes, dist, nAnts = 100, iterations = 4, initialPath = [],
         # Caminha com cada formiga pelo grafo
         for i in range(0, nAnts):
             path, pathSize = antWalk(nodes, nodesSize, distM, phoM, startList)
-
-            # Calcula a pontuação de iniciação dos caminhos
-            startList[path[0].start] +=  phomDeposited * pathSize / nodesSize
-
-            # Calula a pontuação dos feromonios da iteração         
-            for edge in path:
-                phoM[edge.start,edge.end] += phomDeposited * pathSize / nodesSize
-
-            if solution.pathSize == 0 or solution.pathSize < pathSize:
-                print("Resolve Trocar =D =D =D", pathSize)
-                solution = Solution(path, pathSize)
             
+            if pathSize > 0:
+                # Calcula a pontuação de iniciação dos caminhos
+                startList[path[0].start] +=  phomDeposited * pathSize     
+                
+                # Calula a pontuação dos feromonios da iteração         
+                for edge in path:
+                    phoM[edge.start,edge.end] += phomDeposited * pathSize 
+    
+                if solution.pathSize == 0 or solution.pathSize < pathSize:
+                    print("Resolve Trocar =D =D =D", pathSize)
+                    solution = Solution(path, pathSize)
+            else:
+                invalid = invalid + 1;
+                
             finishAntWalk(phoM, startList, solution, decaimento,
-                          phomDeposited)    
+                          phomDeposited)
     
      #Converte indices para nos
     for edge in solution.path:
         edge.start = nodes[edge.start]
         edge.end = nodes[edge.end]
     
-    print("Final", solution.pathSize, "\n")
+    print("Final", solution.pathSize, " increment ", invalid, "\n")
     
     return solution
 

@@ -33,16 +33,16 @@ def solve(fragFileName, outputFile, seqFileName, pathTrees):
 	def dist(a, b):
 		for i in range(0, len(b), 1):
 			if (a.endswith(b[0:len(b) - i])):
-				return  (len(b) - i) # CASO EXISTA ARESTA, RETORNA O TAMANHO
-		return 0.0001 #Numero muito pequeno tendendo a zero
+				overlapSize = (len(b) - i)
+				if overlapSize > 0:
+					return  overlapSize # Retorna o tamanho da sobreposição
+				else:
+					return 0
+		return 0 #Numero muito pequeno tendendo a zero
 
 	solution = aco_solver.solve(nodes, dist, 100, 10, pathTrees)
-	#world = pantspath.World(nodes, dist)
-	#solver = pantspath.Solver(rho = 0.2)
-	#solution = solver.solve(world)
-
-	#outputFile.write("Nodes: " +  str(nodes))
-	#outputFile.write("Nós visitados em ordem: " +  str(solution.tour))
+	
+	
 	#outputFile.write("Distancia da solução: " +  str(solution.distance))
 	# Escrever aqui os parâmetros utilizados em cada execução
 # 	outputFile.write("\nParâmetros Utilizados:"  +

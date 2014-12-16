@@ -7,8 +7,8 @@ from random import randint
 def generate(fragmentsDir, genomeDir, id, genomeSize = 1000, fragmentMinSize = 35, fragmentMaxSize = 50, coverage = 2):
 
     random.seed(1234 * id)
-    # queremos uma cobertura de 10 vezes pelo menos
-    numFragments = math.ceil((genomeSize / fragmentMinSize) * coverage)
+    # Calcula o numero de fragmentos dada a cobertura
+    numFragments = math.ceil(genomeSize / ((fragmentMinSize + fragmentMaxSize)/2) * coverage)
 
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
