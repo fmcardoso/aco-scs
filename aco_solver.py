@@ -18,7 +18,6 @@ class Solution:
         self.pathSize = pathSize
 
 def choose_start(startList):
-
     total = 0
     for i in range(len(startList)):
         total += startList[i]
@@ -31,9 +30,6 @@ def choose_start(startList):
         upto +=  startList[i]
     assert False, "Erro start!!!"
     return 0
-
-# Delta [0 ... 1], quando mais proximo de 0, mais ele privilegia o peso da aresta
-# quanto mais proximo de 1 o contrario
 
 """
  Escolhe a aresta mais pesada em forma de roleta.
@@ -96,7 +92,7 @@ def antWalk(nodes, nodesSize, distM, phoM, startList):
 
     return path, pathSize
 
-def step(start, unvisited, distM, phoM, beta = 0.8, q0 = 0.9):
+def step(start, unvisited, distM, phoM, beta = 2, q0 = 0.9):
     choices = createChoices(start, unvisited, distM, phoM, beta)
     
     if len(choices) == 0:
@@ -113,13 +109,13 @@ def buildSolutionByPath(initialPath, distM, phoM, startList, phomDeposited):
     solution = Solution([], 0)
     start = initialPath[0]
     
-    startList[start] +=  phomDeposited * 5
+    startList[start] +=  phomDeposited * 10
     for end in initialPath:
         solution.path.append(Edge(start, end, distM[start, end]))
         solution.pathSize += distM[start, end]
         
         
-        phoM[start, end] += phomDeposited * 5
+        phoM[start, end] += phomDeposited * 10
         start = end
     return solution
 
@@ -133,20 +129,32 @@ def finishAntWalk(phoM, startList, bestSolution, decaimento, phomDeposited):
         
     for start in startList:
         start = max(start / decaimento, phomDeposited)
-        
+
+def globalUpdate(bestSolution, alpha, phoM):
+    for edge in bestSolution.path:
+        phoM[edge.start,edge.end] = (1 - alpha) * phoM[edge.start,edge.end] 
+        + alpha * bestSolution.pathSize
+            
+def localUpdate(path, phomDeposited, alpha, phoM):
+     for edge in path:
+        phoM[edge.start,edge.end] = (1 - alpha) * phoM[edge.start,edge.end] 
+        + alpha * phomDeposited
+
 """
 Executa colonia de formigas em busca do caminho hamiltoniano de maior peso
 """
-def solve(nodes, dist, nAnts = 100, iterations = 10, initialPath = [],
-          phomDeposited = 1, decaimento = 1.05):
+def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
+          phomDeposited = 1, decaimento = 1.1, alpha=0.1):
     nodesSize = len(nodes)
     
     # Reseta a seed do random
     random.seed()
     
+    phomDeposited = 1/(nodesSize * 2000)
+    
     distM = np.zeros((nodesSize, nodesSize))
     phoM = np.zeros((nodesSize, nodesSize))
-    phoM[:] = phomDeposited
+    phoM[:] = phomDeposited / 2000
     startList = [phomDeposited] * nodesSize
     #startList.fill(0.01)
 
@@ -178,8 +186,7 @@ def solve(nodes, dist, nAnts = 100, iterations = 10, initialPath = [],
                 startList[path[0].start] +=  phomDeposited * pathSize     
                 
                 # Calula a pontuação dos feromonios da iteração         
-                for edge in path:
-                    phoM[edge.start,edge.end] += phomDeposited * pathSize 
+                localUpdate(path, phomDeposited, alpha, phoM)
     
                 if solution.pathSize == 0 or solution.pathSize < pathSize:
                     print("Resolve Trocar =D =D =D", pathSize)
@@ -187,8 +194,7 @@ def solve(nodes, dist, nAnts = 100, iterations = 10, initialPath = [],
             else:
                 invalid = invalid + 1;
                 
-            finishAntWalk(phoM, startList, solution, decaimento,
-                          phomDeposited)
+        globalUpdate(solution, alpha, phoM)
     
      #Converte indices para nos
     for edge in solution.path:

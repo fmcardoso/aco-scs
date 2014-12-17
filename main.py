@@ -16,7 +16,7 @@ ts = time.time()
 
 seqSize = 1000
 fragmentSize = 50
-coverage = 5
+coverage = 8
 
 fragmentsDir = "gen/fragments/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 seqDir = "gen/sequences/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
@@ -36,7 +36,7 @@ if not os.path.exists(os.path.dirname(dataPath)):
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
-for i in range(1, 10):
+for i in range(1, 4):
 	generator.generate(fragmentsDir, seqDir, i, seqSize,
 		fragmentSize-15, fragmentSize, coverage)
 
@@ -65,8 +65,9 @@ with open(resultsDir + str(st) + ".txt", "a+") as outputFile:
 		outputFile.write("\n-----------------------------------\n")
 
 		scsS, scsD, pathTrees = scs_greedy.solve(fragmentsDir + frag, outputFile, seqDir + frag)
-		acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag, [])
-	#	acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag, pathTrees[0])
+		#acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag, [])
+		# Utilizando o greedy como entrada
+		acoS, acoD = aco_scs.solve(fragmentsDir + frag, outputFile, seqDir + frag, pathTrees[0])
 
 		
 		# Vetores com dados de tamanho

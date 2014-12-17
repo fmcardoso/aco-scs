@@ -21,14 +21,6 @@ def solve(fragFileName, outputFile, seqFileName, pathTrees):
 			nodes.append(frag)
 	fragFile.close()
 
-	# XXX - VÉRTICES DO GRAFO
-	# SLIDES - Peso solução otima: 3 + 3 + 4 + 4 = 14
-	#nodes.append('ACTACAC')
-	#nodes.append('CACTCAGGCA')
-	#nodes.append('GCATTCACTA')
-	#nodes.append('ACTAGAAATATA')
-	#nodes.append('TATACCAGC')
-
 	# FUNÇÃO PARA CALCULAR O TAMANHO DA ARESTA ENTRE DOIS VÉRTICES
 	def dist(a, b):
 		for i in range(0, len(b), 1):
@@ -40,7 +32,7 @@ def solve(fragFileName, outputFile, seqFileName, pathTrees):
 					return 0
 		return 0 #Numero muito pequeno tendendo a zero
 
-	solution = aco_solver.solve(nodes, dist, 100, 10, pathTrees)
+	solution = aco_solver.solve(nodes, dist, 20, 150, pathTrees)
 	
 	
 	#outputFile.write("Distancia da solução: " +  str(solution.distance))
