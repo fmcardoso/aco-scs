@@ -2,7 +2,8 @@
 
 import pantspath
 from levenshtein import levenshtein
-import aco_solver 
+import aco_solver
+import aco_solver2
 
 def solve(fragFileName, outputFile, seqFileName, pathTrees):
 	nodes = []
