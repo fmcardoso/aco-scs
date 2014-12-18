@@ -33,7 +33,7 @@ def solve(fragFileName, outputFile, seqFileName, pathTrees):
 					return 0
 		return 0 #Numero muito pequeno tendendo a zero
 
-	solution = aco_solver.solve(nodes, dist, 20, 150, pathTrees)
+	solution = aco_solver2.solve(nodes, dist, 10, 500, pathTrees)
 	
 	
 	#outputFile.write("Distancia da solução: " +  str(solution.distance))

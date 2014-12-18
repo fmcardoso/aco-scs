@@ -64,23 +64,27 @@ def createChoices(start, unvisited, distM, phoM, beta):
         if (distM[start, end] > -1):
             choices.append(Edge(start, end, (distM[start, end]  ** beta) * phoM[start, end]))
     return choices
+
+def getFromCandidateList(clM, start, unvisited):
+    for option in clM[start,:]:
+        if option in unvisited:
+            return option
+    return -1
     
-def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited):
+   
+def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
+            beta, q0):
     unvisited = list(range(0, nodesSize))
 
     i = start
     unvisited.remove(i)
-    j = random.choice(unvisited)
-    unvisited.remove(j)
-    visited = [i, j]
+    visited = [i]
    
-    path = [Edge(i, j, distM[i, j])]
-    pathSize = distM[i, j]
+    path = []
+    pathSize = 0
     
-    while len(unvisited) > 0:
-        localUpdate2(i, j, phomDeposited, phoM)
-        i = j
-        j = step(j, unvisited, distM, phoM)
+    while len(unvisited) > 0:   
+        j = step(i, unvisited, distM, phoM, beta, q0, clM)
         
         # Verifica se não há mais caminhos válidos
         if (j < 0):
@@ -88,18 +92,25 @@ def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited):
         
         visited.append(j)
         unvisited.remove(j)
+        localUpdate2(i, j, phomDeposited, phoM)
         path.append(Edge(i, j, distM[i, j]))
         pathSize += distM[i, j]
+        i = j
 
     return path, pathSize
 
-def step(start, unvisited, distM, phoM, beta = 2, q0 = 0.9):
+def step(start, unvisited, distM, phoM, beta, q0, clM):
+    q = random.random()
+
+    if q <= q0:
+        end = getFromCandidateList(clM, start, unvisited)
+        if end > 0:
+            return end
+    
     choices = createChoices(start, unvisited, distM, phoM, beta)
     
     if len(choices) == 0:
         return -1
-    
-    q = random.random()
 
     if q <= q0:
         return maximalChoice(choices).end
@@ -136,10 +147,60 @@ def localUpdate(path,pathSize, phomDeposited, alpha, phoM, bestPath):
         phoM[edge.start,edge.end] = (1 - alpha) * phoM[edge.start,edge.end] 
         + (alpha * phomDeposited )
 
+def initializeCL(nodesSize, distM):
+    clM = np.zeros((nodesSize, 15))
+    
+    for i in range(nodesSize):
+        sorted = np.argsort(distM[i,:])
+       
+        clM[i,:] = sorted[::-1][:15]
+    
+    return clM.astype(int)
+
+def localOptimization(path, clM, distM, nodesSize):
+    optV = list(range(0, nodesSize))
+    
+    for i in range(1):
+        j = random.choice(optV)
+        
+        e1 = path[j]
+        k = e1.start
+        l = e1.end
+        q = clM[k, 0]
+        
+        if q != l and distM[k, l] < distM[k, q]:
+            for e in path:
+                if e.end == q:
+                    e2 = e
+                    p = e.start
+                    break
+           
+            optV.remove(k)
+            optV.remove(l)
+            optV.remove(q)
+            optV.remove(p)
+            r = random.choice(optV)
+            for e in path:
+                if e.start == r:
+                    s = e.end
+                    e3 = e
+                    break
+            print(distM[k, q] + distM[p, s] + distM[r, l], distM[k, q] + distM[p, s] + distM[r, l])
+            if (distM[k, q] + distM[p, s] + distM[r, l]) > ([k, l] + distM[p, q] + distM[r, s]):
+                e1.end = q
+                e1.length = distM[k, q]
+                e2.end = s
+                e2.length = distM[p, s]
+                e3.end = l
+                e3.length = distM[r, l]
+                print("entrouuuu ")
+                
+                
 """
 Executa colonia de formigas em busca do caminho hamiltoniano de maior peso
 """
-def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.05):
+def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
+          alpha=0.1, beta = 2, q0 = 0.9):
     nodesSize = len(nodes)
     
     # Reseta a seed do random
@@ -155,7 +216,12 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.0
 
     # Inicializa matriz de distancias
     for index, v in np.ndenumerate(distM):
-        distM[index] = dist(nodes[index[0]], nodes[index[1]])
+        if index[0] != index[1]:
+            distM[index] = dist(nodes[index[0]], nodes[index[1]])
+        else:
+            distM[index] = 0
+
+    clM = initializeCL(nodesSize, distM)
 
     if len(initialPath) > 0:
         solution = buildSolutionByPath(initialPath, distM, phoM, startList,
@@ -164,7 +230,7 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.0
         solution = Solution([], 1)
         
     print("Inicialização", solution.pathSize)
-    invalid = 0
+    plateu = 0
     # Executa determinado numero de interações zerando os parametros
     antPaths = [None]* nAnts
     antPathsSize = [0] * nAnts
@@ -181,7 +247,8 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.0
         
         # Caminha com cada formiga pelo grafo
         for i in range(0, nAnts):
-            path, pathSize = antWalk(nodes, nodesSize, distM, phoM, starts[i], phomDeposited)
+            path, pathSize = antWalk(nodes, nodesSize, distM, phoM, starts[i],
+                                     phomDeposited, clM, beta, q0)
             antPaths[i] = path
             antPathsSize[i] = pathSize
         
@@ -199,14 +266,20 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.0
 
             if solution.pathSize == 0 or solution.pathSize < pathSize:
                 print("Resolve Trocar =D =D =D", pathSize)
+                plateu = 0
                 solution = Solution(path, pathSize)
             else:
-                invalid = invalid + 1;
+                plateu = plateu + 1;
+            
+            #localOptimization(path, clM, distM, nodesSize)
+            
+        if plateu > iterations * nAnts /2:
+            break
         
         # Atualiza os vetores do grafico
         v = 0
         for edge in solution.path:
-            v = v + (distM[edge.start, edge.end]  ** 2) * phoM[edge.start, edge.end]
+            v = v + (distM[edge.start, edge.end]  ** beta) * phoM[edge.start, edge.end]
         
         v = v/ nodesSize
         be.append(v)
@@ -223,7 +296,7 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [], alpha=0.0
         edge.start = nodes[edge.start]
         edge.end = nodes[edge.end]
     
-    print("Final", solution.pathSize, " increment ", invalid, "\n")
+    print("Final", solution.pathSize, " plato ", plateu, "\n")
     
     return solution
 
