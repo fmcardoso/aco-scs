@@ -5,6 +5,7 @@ from pygraph.classes.digraph import digraph
 from pygraph.algorithms.cycles import find_cycle
 from levenshtein import levenshtein
 
+# Classe aresta contendo a origem, o destino, o peso e uma flag indicando se ela e valida para adiocionar no caminho hamiltoniano
 class Edge:
   def __init__(self, source, target, weight):
     self.source = source
@@ -18,6 +19,7 @@ class Edge:
   def __str__(self):
     return "{%s, %s, %s, %s}" % (self.source, self.target, self.weight, self.valid)
 
+# Classe Grafo, contendo uma lista de vertices e uma lista de arestas
 class Graph:
   def __init__(self, vertexes):
     self.edges = []
@@ -26,20 +28,21 @@ class Graph:
   def __repr__(self):
     return "{%s, %s}" % (self.edges, self.vertexes)
 
+  # Metodo para encontrar uma aresta dado origem e destino
   def getEdge(self, x, y):
     for edge in self.edges:
       if edge.source==x and edge.target==y:
             return edge
     return None
 
-class Solution:
-  def __init__(self):
-    self.vertexes = []
-    self.sequence = ''
-   
-  def __repr__(self):
-    return "{%s, %s}" % (self.sequence, self.vertexes)
- 
+  # Metodo para buscar uma aresta dado sua origem
+  def getEdgeBySource(self, x):
+    for edge in self.edges:
+      if edge.source==x:
+            return edge
+    return None  
+
+# Funcao que determina o peso da aresta
 def find_overlap(node1, node2):
   overlap = 0;
   for i in range(0, len(node2), 1):
@@ -47,10 +50,16 @@ def find_overlap(node1, node2):
       overlap = i+1 # CASO EXISTA ARESTA, RETORNA O TAMANHO
   return overlap
 
+# Funcao que controi o grafo recebendo a lista de fragmentos como parametro
 def build_graph(nodes):
-  graph = Graph(nodes)
-  #print(graph.vertexes)
+  vertexes = [0 for x in range(len(nodes))] 
+  
+  for i in range(len(nodes)):
+    vertexes[i] = nodes[i]
+
+  graph = Graph(vertexes)
   edges = []
+
   for x in range(0, len(nodes)):
     for y in range(0, len(nodes)):
       if x!=y:
@@ -58,21 +67,8 @@ def build_graph(nodes):
   graph.edges = sorted(edges, key=lambda edge: edge.weight, reverse=True)
   return graph
   
-def build_graph_to_find_cycle(nodes):
-  graph = digraph()
-
-  for x in range (0, len(nodes)):
-    graph.add_node(x)
-  
-  return graph
-
-def hasCycle(digraph, edge):
-  digraph.add_edge((edge.source,edge.target), edge.weight)
-  if not find_cycle(digraph):
-    return False
-  else: return True
-
-def hasCycle2(trees, edge):
+  # Funcao que verifica se um grafo tera um ciclo caso se adiciona uma aresta. O parametro tree representa o grafo antes da adicao da aresta
+def hasCycle(trees, edge):
     sT = False
     sS = False
     
@@ -99,40 +95,33 @@ def hasCycle2(trees, edge):
         
     return False
 
-def join(finalSolution, graph):
-  if (len(finalSolution) > 1):
-    for solution in finalSolution:
-      for solution2 in finalSolution:
-        if (solution!=solution2):
-          if solution.vertexes[-1] == solution2.vertexes[0]:
-            partialSolution = Solution()
-            solutionToRemove1 = solution
-            solutionToRemove2 = solution2
-            for x in range(0, len(solution.vertexes)):
-              partialSolution.vertexes.append(solution.vertexes[x])
-            for x in range(1, len(solution2.vertexes)):
-              partialSolution.vertexes.append(solution2.vertexes[x])
-            partialSolution.sequence = solution.sequence + solution2.sequence[len(graph.vertexes[solution.vertexes[-1]]):]
-    finalSolution.remove(solutionToRemove1)
-    finalSolution.remove(solutionToRemove2)
-    finalSolution.append(partialSolution)
-    join(finalSolution, graph)
-  else: return finalSolution
-
-def assembyFragment(path, nodes, graph):
-  finalSolution = []
+# Funcao para montar a sequencia dado um caminho hamiltoniano
+def assemblyFragment(path):
+  aux = []
+  for x in path.edges:
+    aux.append(x.target)
 
   for edge in path.edges:
-    solution = Solution()
-    solution.vertexes.append(edge.source)
-    solution.vertexes.append(edge.target)
-    solution.sequence += nodes[edge.source] + nodes[edge.target][edge.weight:]
-    finalSolution.append(solution)
+    if edge.source not in aux:
+      first = edge
+  
+  edge = first
+  
+  scs = ""
+  while edge != None:
+    node = path.vertexes[edge.source]
+    scs+=node[:len(node)-edge.weight]
+    if (path.getEdgeBySource(edge.target) == None):
+      scs+=path.vertexes[edge.target]
 
-  join(finalSolution, graph)
-  return finalSolution
+    edge = path.getEdgeBySource(edge.target)
+  return scs
 
+# Funcao para que encontra um caminho hamiltonino. O primeiro parametro representa o arquivo que contem a lista de fragmentos, o segundo 
+# representa o arquivo onde serao gravados os resultados da execucao e o terceiro e o arquivo que contem os resultados do guloso e do acs para
+# posterior comparacao
 def solve(fragFileName, outputFile, seqFileName):
+    # Montar o grafo
     nodes = []
   
     fragFile = open(fragFileName, "r")
@@ -149,52 +138,45 @@ def solve(fragFileName, outputFile, seqFileName):
             nodes.append(frag)
     fragFile.close()
 
-  # XXX - VÉRTICES DO GRAFO
-    # SLIDES - Peso solução otima: 3 + 3 + 4 + 4 = 14
-#   nodes.append('ACTACAC')
-#   nodes.append('CACTCAGGCA')
-#   nodes.append('GCATTCACTA')
-#   nodes.append('ACTAGAAATATA')
-#   nodes.append('TATACCAGC')
-
     graph = build_graph(nodes)
 
-#     print('Graph: ', graph.edges, '\n')
-
     path = Graph([])
+    path.vertexes = [0 for x in range(len(nodes))]
     trees = []
-    
-    #### ENCONTRAR CAMINHO HAMILTONIANO
+
+    #### Encontrar o caminho hamiltoniano
     for edge in graph.edges:
         for x in path.edges:
+            # Verifica se a origem e o destino da aresta candidata ja existem no grafo
             if edge.source == x.source:
                 edge.valid = False
             elif edge.target == x.target:
                 edge.valid = False
 
-        if edge.valid and hasCycle2(trees, edge):
+        # Verifica se a adicao da aresta ira formar ciclo no caminho
+        if edge.valid and hasCycle(trees, edge):
             edge.valid = False
-    
+        
+        # Se aresta passar pelos testes anteriores ela e adcionada ao caminho
         if (edge.valid):
             path.edges.append(edge)
-        if edge.source not in path.vertexes:
-            path.vertexes.append(edge.source)
-        if edge.target not in path.vertexes: 
-            path.vertexes.append(edge.target)
+        if graph.vertexes[edge.source] not in path.vertexes:
+            path.vertexes[edge.source] = graph.vertexes[edge.source]
+        if graph.vertexes[edge.target] not in path.vertexes: 
+            path.vertexes[edge.target] = graph.vertexes[edge.target]
         
         if len(nodes) == len(path.edges) + 1:
             break
     
- 
-    #### MONTAR A SEQUENCIA ORIGINAL
-    assembledSequence = assembyFragment(copy.deepcopy(path), nodes, graph)
+    #### Monta a sequencia baseada no caminho encontrado
+    assembledSequence = assemblyFragment(copy.deepcopy(path))
     # Tamanho da solução
-    result = len(assembledSequence[0].sequence)
+    result = len(assembledSequence)
     
-    # Distância da solução
+    # # Distância da solução
     seqFile = open(seqFileName, "r")
     sequence = seqFile.readlines()
-    dist = levenshtein.levenshteinDistance(assembledSequence[0].sequence, sequence[0])
+    dist = levenshtein.levenshteinDistance(assembledSequence, sequence[0])
 
     outputFile.write('\nGreedy: Tamanho da sequencia montada: ' + str(result))
     outputFile.write("\nnGreedy: Levenshtein Distance = " + 
