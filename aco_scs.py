@@ -2,8 +2,8 @@
 
 import pantspath
 from levenshtein import levenshtein
-import aco_solver
-import aco_solver2
+import acs_solver
+import as_solver
 
 def solve(fragFileName, outputFile, seqFileName, pathTrees):
 	nodes = []
@@ -31,9 +31,9 @@ def solve(fragFileName, outputFile, seqFileName, pathTrees):
 					return  overlapSize # Retorna o tamanho da sobreposição
 				else:
 					return 0
-		return 0 #Numero muito pequeno tendendo a zero
+		return 0
 
-	solution = aco_solver2.solve(nodes, dist, 10, 500, pathTrees)
+	solution = acs_solver.solve(nodes, dist, 10, 500, pathTrees)
 	
 	
 	#outputFile.write("Distancia da solução: " +  str(solution.distance))

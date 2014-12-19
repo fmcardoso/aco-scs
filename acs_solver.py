@@ -17,6 +17,7 @@ class Solution:
         self.path = path
         self.pathSize = pathSize
 
+""" Escolhe o incicio mais pesado """
 def choose_start(startList):
     total = 0
     for i in range(len(startList)):
@@ -56,7 +57,8 @@ def maximalChoice(choices):
             bestV = e.length
     
     return bestE
-   
+
+""" Cria opções de escolha """
 def createChoices(start, unvisited, distM, phoM, beta):
     choices = []
     for end in unvisited:
@@ -65,13 +67,14 @@ def createChoices(start, unvisited, distM, phoM, beta):
             choices.append(Edge(start, end, (distM[start, end]  ** beta) * phoM[start, end]))
     return choices
 
+""" Retorna melhor opção viavel da lista de candidatos """
 def getFromCandidateList(clM, start, unvisited):
     for option in clM[start,:]:
         if option in unvisited:
             return option
     return -1
     
-   
+""" Efetua os passeios de cada formiga """
 def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
             beta, q0, cl):
     unvisited = list(range(0, nodesSize))
@@ -92,13 +95,14 @@ def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
         
         visited.append(j)
         unvisited.remove(j)
-        localUpdate2(i, j, phomDeposited, phoM)
+        localUpdateDecrease(i, j, phomDeposited, phoM)
         path.append(Edge(i, j, distM[i, j]))
         pathSize += distM[i, j]
         i = j
 
     return path, pathSize
 
+""" Caminha para um vértice """
 def step(start, unvisited, distM, phoM, beta, q0, clM, cl):
     q = random.random()
 
@@ -117,6 +121,7 @@ def step(start, unvisited, distM, phoM, beta, q0, clM, cl):
     else:
         return weighted_choice(choices).end
 
+""" Adiciona os feromonios dada uma solução de entrada """
 def buildSolutionByPath(initialPath, distM, phoM, startList, phomDeposited):
     solution = Solution([], 0)
     start = initialPath[0]
@@ -131,6 +136,7 @@ def buildSolutionByPath(initialPath, distM, phoM, startList, phomDeposited):
         start = end
     return solution
 
+""" Update global de execução """
 def globalUpdate(bestSolution, alpha, phoM):
      # Inicializa matriz de distancias
     for index, v in np.ndenumerate(phoM):
@@ -139,14 +145,17 @@ def globalUpdate(bestSolution, alpha, phoM):
     for edge in bestSolution.path:
         phoM[edge.start,edge.end] += alpha * bestSolution.pathSize
 
-def localUpdate2(start, end, phomDeposited, phoM, alpha = 0.1):
+""" Reduz a quantidade de feromonio de um aresta visitada """
+def localUpdateDecrease(start, end, phomDeposited, phoM, alpha = 0.1):
     phoM[start, end] = (1 - alpha) * phoM[start, end] + (alpha * phomDeposited )
-          
+
+""" Reduz a quantidade de feromonio de todas as areastas """       
 def localUpdate(path,pathSize, phomDeposited, alpha, phoM, bestPath):
      for edge in path:
         phoM[edge.start,edge.end] = (1 - alpha) * phoM[edge.start,edge.end] 
         + (alpha * phomDeposited )
 
+""" Inicializa a lista de candidatos """
 def initializeCL(nodesSize, distM):
     clM = np.zeros((nodesSize, min(15, nodesSize)))
     
@@ -157,6 +166,7 @@ def initializeCL(nodesSize, distM):
     
     return clM.astype(int)
 
+""" Optimzação local 3-opt para um caminho """
 def localOptimization(path, clM, distM, nodesSize):
     optV = list(range(0, nodesSize))
     
@@ -206,6 +216,7 @@ def solve(nodes, dist, nAnts = 10, iterations = 150, initialPath = [],
     # Reseta a seed do random
     random.seed()
     
+    # Calcula o feromonio inicial
     phomDeposited = 1500/(nodesSize)
     
     distM = np.zeros((nodesSize, nodesSize))
@@ -236,8 +247,6 @@ def solve(nodes, dist, nAnts = 10, iterations = 150, initialPath = [],
     antPathsSize = [0] * nAnts
     
     be = []
-    te = []
-    ue = []
     
     for j in range(iterations):
 #         phoM[:] = phomDeposited
@@ -286,7 +295,7 @@ def solve(nodes, dist, nAnts = 10, iterations = 150, initialPath = [],
              
         globalUpdate(solution, alpha, phoM)
         
-#     
+#     Plota o grafico da relação de feromonios.
 #     plt.figure(1)
 #     plt.plot(be, label = "be")
 #     plt.show()

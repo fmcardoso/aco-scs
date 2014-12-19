@@ -3,7 +3,6 @@ import generator
 import aco_scs
 import scs_greedy
 import os
-import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
 import datetime
@@ -14,10 +13,12 @@ import plot_helper as ph
 
 ts = time.time()
 
+# Especificações das sequências a ser geradas.
 seqSize = 1000
 fragmentSize = 50
-coverage = 8
+coverage = 6
 
+# Caminhos
 fragmentsDir = "gen/fragments/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 seqDir = "gen/sequences/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
 resultsDir = "gen/results/" + datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y') + "/"
@@ -113,7 +114,7 @@ with open(dataPath, 'w') as dataFile:
 ph.plotExecution(acoSizeVector, scsSizeVector, acoDistVector, scsDistVector,
 				 resultsDir + str(st))
 
-# Plota os graficos gerais
+# Plota os graficos gerais. Zerar data.json ao mudar tipo de grafico.
 ph.plotAll(data, plotPath)
 
 print("---- Fim Execução ----")
