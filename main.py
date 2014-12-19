@@ -36,9 +36,9 @@ if not os.path.exists(os.path.dirname(dataPath)):
 
 # Inicia os framentos
 # Descomentar para gerar as sequências
-# for i in range(1, 4):
-#  	generator.generate(fragmentsDir, seqDir, i, seqSize,
-#  		fragmentSize-15, fragmentSize, coverage)
+for i in range(1, 10):
+	generator.generate(fragmentsDir, seqDir, i, seqSize, 
+					fragmentSize-5, fragmentSize, coverage)
 
 # Gera arquivo de output
 st = str(seqSize) + "-" + str(fragmentSize) + "-" + str(coverage)

@@ -73,7 +73,7 @@ def getFromCandidateList(clM, start, unvisited):
     
    
 def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
-            beta, q0):
+            beta, q0, cl):
     unvisited = list(range(0, nodesSize))
 
     i = start
@@ -84,7 +84,7 @@ def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
     pathSize = 0
     
     while len(unvisited) > 0:   
-        j = step(i, unvisited, distM, phoM, beta, q0, clM)
+        j = step(i, unvisited, distM, phoM, beta, q0, clM, cl)
         
         # Verifica se não há mais caminhos válidos
         if (j < 0):
@@ -99,10 +99,10 @@ def antWalk(nodes, nodesSize, distM, phoM, start, phomDeposited, clM,
 
     return path, pathSize
 
-def step(start, unvisited, distM, phoM, beta, q0, clM):
+def step(start, unvisited, distM, phoM, beta, q0, clM, cl):
     q = random.random()
 
-    if q <= q0:
+    if cl and q <= q0:
         end = getFromCandidateList(clM, start, unvisited)
         if end > 0:
             return end
@@ -148,12 +148,12 @@ def localUpdate(path,pathSize, phomDeposited, alpha, phoM, bestPath):
         + (alpha * phomDeposited )
 
 def initializeCL(nodesSize, distM):
-    clM = np.zeros((nodesSize, 15))
+    clM = np.zeros((nodesSize, min(15, nodesSize)))
     
     for i in range(nodesSize):
         sorted = np.argsort(distM[i,:])
        
-        clM[i,:] = sorted[::-1][:15]
+        clM[i,:] = sorted[::-1][:min(15, nodesSize)]
     
     return clM.astype(int)
 
@@ -199,8 +199,8 @@ def localOptimization(path, clM, distM, nodesSize):
 """
 Executa colonia de formigas em busca do caminho hamiltoniano de maior peso
 """
-def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
-          alpha=0.1, beta = 2, q0 = 0.9):
+def solve(nodes, dist, nAnts = 10, iterations = 150, initialPath = [],
+          alpha=0.1, beta = 2, q0 = 0.9, cl = True):
     nodesSize = len(nodes)
     
     # Reseta a seed do random
@@ -248,7 +248,7 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
         # Caminha com cada formiga pelo grafo
         for i in range(0, nAnts):
             path, pathSize = antWalk(nodes, nodesSize, distM, phoM, starts[i],
-                                     phomDeposited, clM, beta, q0)
+                                     phomDeposited, clM, beta, q0, cl)
             antPaths[i] = path
             antPathsSize[i] = pathSize
         
@@ -265,7 +265,7 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
                # localUpdate(path, pathSize, phomDeposited, alpha, phoM, solution.pathSize)
 
             if solution.pathSize == 0 or solution.pathSize < pathSize:
-                print("Resolve Trocar =D =D =D", pathSize)
+                print("Novo ótimo:", pathSize)
                 plateu = 0
                 solution = Solution(path, pathSize)
             else:
@@ -286,10 +286,10 @@ def solve(nodes, dist, nAnts = 20, iterations = 100, initialPath = [],
              
         globalUpdate(solution, alpha, phoM)
         
-    
-    plt.figure(1)
-    plt.plot(be, label = "be")
-    plt.show()
+#     
+#     plt.figure(1)
+#     plt.plot(be, label = "be")
+#     plt.show()
     
      #Converte indices para nos
     for edge in solution.path:
